@@ -5,7 +5,7 @@ from snipsTools import SnipsConfigParser
 from hermes_python.hermes import Hermes
 from hermes_python.ontology import *
 import io
-import grove
+import grove.grove_relay
 
 CONFIG_INI = "config.ini"
 
