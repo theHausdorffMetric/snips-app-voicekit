@@ -1,3 +1,3 @@
-## Documentation
+## Voice Kit for Snips
 
-***[Please find the full documentation here](https://snips.gitbook.io/documentation/create-an-app/python-template)***
+For Voice Kit with Respeaker 2 Mic Hat, Grove - Relay and Grove - Temperature & Humidity Sensor (SHT31)
