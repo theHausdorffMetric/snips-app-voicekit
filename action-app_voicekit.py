@@ -6,6 +6,7 @@ from hermes_python.hermes import Hermes
 from hermes_python.ontology import *
 import io
 import grove.grove_relay
+import grove.grove_temperature_humidity_sensor_sht3x
 
 CONFIG_INI = "config.ini"
 
@@ -30,7 +31,7 @@ class VoiceKit(object):
             self.config = None
 
         self.relay = grove.grove_relay.Grove(12)
-        # self.temperature_humidity_sensor = grove.grove_temperature_humidity_sensor_sht3x.Grove()
+        self.temperature_humidity_sensor = grove.grove_temperature_humidity_sensor_sht3x.Grove()
 
         # start listening to MQTT
         self.start_blocking()
@@ -65,18 +66,35 @@ class VoiceKit(object):
         # action code goes here...
         print '[Received] intent: {}'.format(intent_message.intent.intent_name)
 
+        # In Celsius
+        temperature, _ = self.temperature_humidity_sensor.read()
+
         # if need to speak the execution result by tts
-        hermes.publish_start_session_notification(intent_message.site_id, "The temperature is {} degree".format(25), "")
+        hermes.publish_start_session_notification(intent_message.site_id, "The temperature is {} degree".format(int(temperature)), "")
+
+    def answer_humidity(self, hermes, intent_message):
+        # terminate the session first if not continue
+        hermes.publish_end_session(intent_message.session_id, "")
+
+        # action code goes here...
+        print '[Received] intent: {}'.format(intent_message.intent.intent_name)
+
+        _, humidity = self.temperature_humidity_sensor.read()
+
+        # if need to speak the execution result by tts
+        hermes.publish_start_session_notification(intent_message.site_id, "The humidity is {} percent".format(int(humidity)), "")
 
     # --> Master callback function, triggered everytime an intent is recognized
     def master_intent_callback(self,hermes, intent_message):
         coming_intent = intent_message.intent.intent_name
         if coming_intent == 'seeed:relay_on':
             self.relay_on(hermes, intent_message)
-        elif coming_intent == 'seeed:relay_on':
+        elif coming_intent == 'seeed:relay_off':
             self.relay_off(hermes, intent_message)
         elif coming_intent == 'seeed:ask_temperature':
             self.answer_temperature(hermes, intent_message)
+        elif coming_intent == 'seeed:ask_humidity':
+            self.answer_humidity(hermes, intent_message)
 
     # --> Register callback function and start MQTT
     def start_blocking(self):
