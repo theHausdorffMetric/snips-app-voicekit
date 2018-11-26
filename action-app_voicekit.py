@@ -27,8 +27,10 @@ class VoiceKit(object):
         # get the configuration if needed
         try:
             self.config = SnipsConfigParser.read_configuration_file(CONFIG_INI)
+            self.mqtt_address = self.config.get("secret").get("mqtt").encode()
         except :
             self.config = None
+            self.mqtt_address = MQTT_ADDR
 
         self.relay = grove.grove_relay.Grove(12)
         self.temperature_humidity_sensor = grove.grove_temperature_humidity_sensor_sht3x.Grove()
@@ -98,7 +100,7 @@ class VoiceKit(object):
 
     # --> Register callback function and start MQTT
     def start_blocking(self):
-        with Hermes(MQTT_ADDR) as h:
+        with Hermes(self.mqtt_address) as h:
             h.subscribe_intents(self.master_intent_callback).start()
 
 if __name__ == "__main__":
